@@ -18,3 +18,8 @@ python==3.12
 ```
 conda create -n <env_name> python=3.12 -y
 ```
+
+3. Install the neccessary requirements
+```
+pip install -r requirements.txt
+```
