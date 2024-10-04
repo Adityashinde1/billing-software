@@ -1,4 +1,5 @@
 import sys
+import bcrypt
 import logging
 from json import loads
 from os import environ
@@ -84,10 +85,12 @@ class MongoDBOperation:
         logging.info("Entered insert_user_entry method of MongoDB_Operation")
 
         try:
+            hashed_password = bcrypt.hashpw(user_password.encode('utf-8'), bcrypt.gensalt())
+
             record = {
                 "user_name": user_name,
                 "user_emailid": user_emailid,
-                "password": user_password
+                "password": hashed_password
             }
 
             logging.info("gathered user's information")
@@ -96,15 +99,29 @@ class MongoDBOperation:
 
             collection = database.get_collection(collection_name)
 
-            logging.info("Inserting record to MongoDB",)
+            if collection.find_one({
+                "user_name": user_name,
+                "user_emailid": user_emailid
+            }):
+                message = "User already exists..!"
 
-            collection.insert_one(record)
+            else:
 
-            logging.info("Inserted record to MongoDB")
+                logging.info("Inserting record to MongoDB",)
+
+                collection.insert_one(record)
+
+                logging.info("Inserted record to MongoDB")
+
+                message = "User's signed up successfully...!"
+
+                logging.info(f"User signed up successfully. User name - {user_name}")
 
             logging.info(
-                "Exited the insert_dataframe_as_record method of MongoDB_Operation"
+                "Exited the insert_user_entry method of MongoDB_Operation"
             )
+
+            return message
 
         except Exception as e:
             raise e
@@ -163,6 +180,42 @@ class MongoDBOperation:
             logging.info("Exited delete_user method of MongoDB_Operation")
             
             return deletion_flag
+
+        except Exception as e:
+            raise e
+
+    def validate_user_login(self, db_name: str, collection_name: str, user_emailid: str, user_name: str, user_password: str) -> str:
+        
+        logging.info("Entered validate_user_login method of MongoDB_Operation")
+
+        try:
+            message = ""
+            database = self.get_database(db_name)
+
+            collection = database.get_collection(collection_name)
+
+            user = collection.find_one({
+                "user_name": user_name,
+                "user_emailid": user_emailid
+            })
+
+            if user:
+                hashed_password = user["password"]
+
+                if bcrypt.checkpw(user_password.encode('utf-8'), hashed_password=hashed_password):
+                    logging.info(f"Login successful..! for user - {user_name}")
+                    message = "Login successful..!"
+                else:
+                    logging.info(f"Invalid password. for user - {user_name}")
+                    message = "Invalid password."
+
+            else:
+                logging.info(f"User not found. User name - {user_name}. User Email - {user_emailid}")
+                message = "User not found."
+
+            logging.info("Entered validate_user_login method of MongoDB_Operation")
+
+            return message
 
         except Exception as e:
             raise e
