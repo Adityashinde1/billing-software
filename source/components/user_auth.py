@@ -3,7 +3,7 @@ import jwt
 import datetime
 import logging
 from source.exception import BillingException
-from source.constants import DB_NAME, COLLECTION_NAME
+from source.constants import DB_NAME, COLLECTION_NAME, BLACKLIST_COLLECTION_NAME
 from source.configuration.mongo_operations import MongoDBOperation
 from secretts_key import JWT_SECRET_KEY
 
@@ -24,7 +24,7 @@ class UserSignUp:
             message = self.mongo_operations.insert_user_entry(db_name=DB_NAME, collection_name=COLLECTION_NAME, user_name=self.user_name,
                                                           user_emailid=self.user_emailid, user_password=self.user_password)
 
-            logger.info("exited the start_user_sign_up method of User Sign up class")
+            logger.info("Exited the start_user_sign_up method of User Sign up class")
 
             return message
 
@@ -37,9 +37,11 @@ class UserLogin:
 
     secret_key = JWT_SECRET_KEY
 
-    def __init__(self, user_name: str, user_password: str) -> None:
+    def __init__(self, user_name: str, user_emailid: str, user_password: str) -> None:
         self.user_name = user_name
+        self.user_emailid = user_emailid
         self.user_password = user_password
+        self.mongo_operations = MongoDBOperation()
 
     def create_jwt(self, user_name: str, user_emailid: str) -> str:
         logger.info("Entered the create_jwt method of User Login class")
@@ -60,30 +62,54 @@ class UserLogin:
 
         except Exception as e:
             raise BillingException(e, sys) from e
-        
-    def verify_jwt(self, token: str) -> bool:
-        logger.info("Entered the verify_jwt method of User Login class")
+
+    def start_login(self) -> str:
+
+        logger.info("Entered the start_login method of User Login class")
 
         try:
-            payload = jwt.decode(token, self.secret_key, algorithms=["HS256"])
+            message = self.mongo_operations.validate_user_login(db_name=DB_NAME, collection_name=COLLECTION_NAME, user_emailid=self.user_emailid, user_name=self.user_name, user_password=self.user_password)
 
-            logger.info("Existed the verify_jwt method of User Login class")
-            return payload
+            if message == "Login successful..!":
+                token = self.create_jwt(user_name=self.user_name, user_emailid=self.user_emailid)
 
-        except jwt.ExpiredSignatureError:
-            logger.info("Token has expired")
-            return None
-        
-        except jwt.InvalidTokenError:
-            logger.info("Invalid token")
-            return None
+                logger.info(f"Login successful and generated token for User - {self.user_name}, and Token - {token}")
+                logger.info("Exited the start_login method of User Login class")
+
+                return token
+            
+            else:
+                
+                logger.info(f"Login failed and did not generated the token for User - {self.user_name}")
+                return None
+
+        except Exception as e:
+            raise BillingException(e, sys) from e
 
     # query the user_name and user_password to the database and retrun flag - True or False
 
 class UserLogout:
-    def __init__(self, user_name: str) -> None:
-        self.user_name = user_name
-    # returns a flag user logout successfully
+    def __init__(self, token: str ) -> None:
+        self.token = token
+        self.mongo_operations = MongoDBOperation()
+
+    def start_logout(self):
+        
+        logger.info("Entered the start_logout method of User Logout class")
+
+        try:
+            self.mongo_operations.insert_blacklist_token(db_name=DB_NAME, blacklist_collection_name=BLACKLIST_COLLECTION_NAME, token=self.token)
+
+            logger.info("User has been log out successfully.")
+
+            logger.info("Exited the start_logout method of User Logout class")
+
+            return True
+
+        except Exception as e:
+            logger.info(f"An error occured during logout, Error: {e}")
+
+        # returns a flag user logout successfully
 
 
 class UserDelete:

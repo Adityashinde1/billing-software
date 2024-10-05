@@ -219,3 +219,19 @@ class MongoDBOperation:
 
         except Exception as e:
             raise e
+
+    def insert_blacklist_token(self, db_name: str, blacklist_collection_name: str, token: str) -> None:
+        
+        logging.info("Entered the insert_blacklist_token method of MongoDb operation class")
+
+        try:
+            database = self.get_database(db_name)
+
+            blacklist_collection = database.get_collection(blacklist_collection_name)
+
+            blacklist_collection.insert_one({"token": token})
+
+            logging.info("Token has been inserted to the blacklisted collection")
+
+        except Exception as e:
+            raise e
