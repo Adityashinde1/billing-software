@@ -113,7 +113,7 @@ class MongoDBOperation:
 
                 logging.info("Inserted record to MongoDB")
 
-                message = "User's signed up successfully...!"
+                message = "User signed up successfully...!"
 
                 logging.info(f"User signed up successfully. User name - {user_name}")
 

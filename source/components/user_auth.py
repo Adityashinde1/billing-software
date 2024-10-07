@@ -89,16 +89,15 @@ class UserLogin:
     # query the user_name and user_password to the database and retrun flag - True or False
 
 class UserLogout:
-    def __init__(self, token: str ) -> None:
-        self.token = token
+    def __init__(self) -> None:
         self.mongo_operations = MongoDBOperation()
 
-    def start_logout(self):
+    def start_logout(self, token: str) -> bool:
         
         logger.info("Entered the start_logout method of User Logout class")
 
         try:
-            self.mongo_operations.insert_blacklist_token(db_name=DB_NAME, blacklist_collection_name=BLACKLIST_COLLECTION_NAME, token=self.token)
+            self.mongo_operations.insert_blacklist_token(db_name=DB_NAME, blacklist_collection_name=BLACKLIST_COLLECTION_NAME, token=token)
 
             logger.info("User has been log out successfully.")
 
