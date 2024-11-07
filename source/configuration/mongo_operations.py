@@ -1,8 +1,5 @@
-import sys
 import bcrypt
 import logging
-from json import loads
-from os import environ
 from typing import Collection
 from pandas import DataFrame
 from pymongo.database import Database
@@ -24,7 +21,7 @@ class MongoDBOperation:
         try:
             db = self.client[db_name]
 
-            logging.info(f"Created {db_name} database in MongoDB")
+            logging.info(f"Switched to {db_name} database in MongoDB")
 
             logging.info("Exited get_database method MongoDB_Operation class")
 
@@ -41,7 +38,7 @@ class MongoDBOperation:
         try:
             collection = database[collection_name]
 
-            logging.info(f"Created {collection_name} collection in mongodb")
+            logging.info(f"Switched to {collection_name} collection in mongodb")
 
             logging.info("Exited get_collection method of MongoDB_Operation class ")
 
@@ -128,7 +125,7 @@ class MongoDBOperation:
 
     def delete_user(self, db_name: str, collection_name: str, user_emailid: str = None, user_name: str = None, users_list: list = None) -> str:
         """
-        If you want to delete single user at a time Delete the user by proving its user_name and 
+        If you want to delete single user at a time Delete the user by providing its user_name and 
         user_email.
         users_list: If you want to delete multiple users at a time, you have to use users_list parameter
 
@@ -231,7 +228,7 @@ class MongoDBOperation:
 
             blacklist_collection.insert_one({"token": token})
 
-            logging.info("Token has been inserted to the blacklisted collection")
+            logging.info(f"Token has been inserted to the blacklisted collection. Token - {token}")
 
         except Exception as e:
             raise e

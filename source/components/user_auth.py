@@ -3,7 +3,7 @@ import jwt
 import datetime
 import logging
 from source.exception import BillingException
-from source.constants import DB_NAME, COLLECTION_NAME, BLACKLIST_COLLECTION_NAME
+from source.constants import DB_NAME, USER_COLLECTION_NAME, BLACKLIST_COLLECTION_NAME
 from source.configuration.mongo_operations import MongoDBOperation
 from secretts_key import JWT_SECRET_KEY
 
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class UserSignUp:
-    def __init__(self, user_name: str, user_emailid, user_password) -> None:
+    def __init__(self, user_name: str, user_emailid: str, user_password: str) -> None:
         self.user_name = user_name
         self.user_emailid = user_emailid
         self.user_password = user_password
@@ -21,7 +21,7 @@ class UserSignUp:
         logger.info("Entered the start_user_sign_up method of User Sign up class")
 
         try:
-            message = self.mongo_operations.insert_user_entry(db_name=DB_NAME, collection_name=COLLECTION_NAME, user_name=self.user_name,
+            message = self.mongo_operations.insert_user_entry(db_name=DB_NAME, collection_name=USER_COLLECTION_NAME, user_name=self.user_name,
                                                           user_emailid=self.user_emailid, user_password=self.user_password)
 
             logger.info("Exited the start_user_sign_up method of User Sign up class")
@@ -68,7 +68,7 @@ class UserLogin:
         logger.info("Entered the start_login method of User Login class")
 
         try:
-            message = self.mongo_operations.validate_user_login(db_name=DB_NAME, collection_name=COLLECTION_NAME, user_emailid=self.user_emailid, user_name=self.user_name, user_password=self.user_password)
+            message = self.mongo_operations.validate_user_login(db_name=DB_NAME, collection_name=USER_COLLECTION_NAME, user_emailid=self.user_emailid, user_name=self.user_name, user_password=self.user_password)
 
             if message == "Login successful..!":
                 token = self.create_jwt(user_name=self.user_name, user_emailid=self.user_emailid)

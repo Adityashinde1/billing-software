@@ -10,6 +10,17 @@ python==3.12
 3. Flask
 4. MangoDB
 
+
+- To install node.js
+```
+curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash
+```
+
+- To install 
+```
+nvm install v20.11.1
+```
+
 ## steps to install
 
 1. Install anaconda on your system.
